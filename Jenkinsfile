@@ -6,7 +6,6 @@ podTemplate(
 
     node("kubernetes") {
            stage('Get a Golang project') {
-            git url: 'https://github.com/hashicorp/terraform.git'
             container('docker') {
                 stage('Docker Build') {
                     sh "docker version"
