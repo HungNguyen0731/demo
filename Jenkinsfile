@@ -1,31 +1,35 @@
-podTemplate(
-    label: "kubernetes",
-    containers: [
-        containerTemplate(
-            name: 'docker', 
-            image: 'docker:latest', 
-            ttyEnabled: true, 
-            command: 'cat',
-            volumeMounts: [
-                mountPath: '/var/run/docker.sock',
-                name: 'docker-socket'
-            ]
-        )
-    ],
-    volumes: [
-        hostPathVolume(
-            hostPath: '/var/run/docker.sock',
-            name: 'docker-socket'
-        )
-    ]
-) {
-    node("kubernetes") {
-        stage('Get a Golang project') {
-            container('docker') {
-                stage('Docker Build') {
-                    sh "docker version"
-                }
-            }
-        }
+podTemplate(yaml: '''
+              apiVersion: v1
+              kind: Pod
+              spec:
+                volumes:
+                - name: docker-socket
+                  emptyDir: {}
+                containers:
+                - name: docker
+                  image: docker:19.03.1
+                  readinessProbe:
+                    exec:
+                      command: [sh, -c, "ls -S /var/run/docker.sock"]
+                  command:
+                  - sleep
+                  args:
+                  - 99d
+                  volumeMounts:
+                  - name: docker-socket
+                    mountPath: /var/run
+                - name: docker-daemon
+                  image: docker:19.03.1-dind
+                  securityContext:
+                    privileged: true
+                  volumeMounts:
+                  - name: docker-socket
+                    mountPath: /var/run
+''') {
+  node(POD_LABEL) {
+    writeFile file: 'Dockerfile', text: 'FROM scratch'
+    container('docker') {
+      sh 'docker version && DOCKER_BUILDKIT=1 docker build --progress plain -t testing .'
     }
+  }
 }
