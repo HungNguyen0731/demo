@@ -20,7 +20,7 @@ spec:
   def image = "jenkins/jnlp-slave"
   node(POD_LABEL) {
     stage('Build Docker image') {
-      git url:'https://github.com/HungNguyen0731/demo.git' branch: 'new'
+      git url:'https://github.com/HungNguyen0731/demo.git', branch: 'new'
       container('docker') {
         sh "docker build -t demoapp:123 -f 'DEMO/Dockerfile'"
       }
