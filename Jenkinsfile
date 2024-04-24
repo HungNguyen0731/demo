@@ -30,8 +30,8 @@ spec:
       stage('Push image DockerHub') {
       container('docker') {
         sh "docker login -u hungnv31007 -p ${env.DOCKER_CI_PASSWORD} "
-        sh "docker image tag demoapp:${version} hungnv/demoapp:${version}"
-        sh "docker push hungnv/demoapp:123"
+        sh "docker image tag demoapp:${version} hungnv31007/demoapp:${version}"
+        sh "docker push hungnv31007/demoapp:${version}"
       }
     }
     
