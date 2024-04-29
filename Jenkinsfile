@@ -18,7 +18,7 @@ spec:
   ) {
 
   def image = "jenkins/jnlp-slave"
-  def version = '1.0_' + env.BUILD_NUMBER
+  def version = '1.0.0'
   node(POD_LABEL) {
     
     stage('Build Docker image') {
