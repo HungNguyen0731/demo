@@ -1,16 +1,21 @@
     // Assuming yaml is same for all nodes - if not it can be passed as parameter
     podYaml= """
-    apiVersion: v1
-    kind: Pod
-    spec:
-    containers:
-    - name: name
-        image: image
-        command:
-        - sleep
-        args:
-        - infinity
-    """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:latest
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: dockersock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: dockersock
+    hostPath:
+      path: /var/run/docker.sock
+"""
 
     pipeline {
         agent none
