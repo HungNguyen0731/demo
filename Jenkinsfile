@@ -1,4 +1,3 @@
-    // Assuming yaml is same for all nodes - if not it can be passed as parameter
     podYaml= """
 apiVersion: v1
 kind: Pod
@@ -23,8 +22,7 @@ spec:
             stage('Create List of Stages to run in Parallel') {
                 steps {
                     script {
-                        def map = ["name" : "demoapp1",
-                                "name2" : "demoapp2"]
+                        def map = ["new" : "demoapp1"]
                         parallel map.collectEntries {
                             ["${it.key}" : generateStage(it)]
                         }
