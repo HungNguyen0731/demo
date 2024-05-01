@@ -1,4 +1,4 @@
-podTemplate(yaml: """
+podYaml= """
 apiVersion: v1
 kind: Pod
 spec:
@@ -15,25 +15,45 @@ spec:
     hostPath:
       path: /var/run/docker.sock
 """
-  ) {
 
-  def image = "jenkins/jnlp-slave"
-  def version = '1.0.'+ env.BUILD_NUMBER
-  node(POD_LABEL) {
-    
-    stage('Build Docker image') {
-      git url:'https://github.com/HungNguyen0731/demo.git', branch: 'new'
-      container('docker') {
-        sh "docker build -t demoapp:${version} -f 'DEMO/Dockerfile' ."
-      }
+pipeline {
+    agent none
+    stages {
+        stage('Create List of Stages to run in Parallel') {
+            steps {
+                script {
+                    def map = ["name" : "demoapp1",
+                              "name2" : "demoapp2"]
+                    parallel map.collectEntries {
+                        ["${it.key}" : generateStage(it)]
+                    }
+                }
+            }
+        }
     }
-      stage('Push image DockerHub') {
-      container('docker') {
-        sh "docker login -u hungnv31007 -p ${env.DOCKER_CI_PASSWORD} "
-        sh "docker image tag demoapp:${version} hungnv31007/demoapp:${version}"
-        sh "docker push hungnv31007/demoapp:${version}"
-      }
+}
+
+def generateStage(job) {
+    return {
+        stage(job.key) {
+            podTemplate(yaml:podYaml)  {
+                node(POD_LABEL) {
+                    
+                    stage("Build Docker image ${job.key}") {
+                    git url:'https://github.com/HungNguyen0731/demo.git', branch: 'new'
+                    container('docker') {
+                        sh "docker build -t demoapp:${version} -f 'DEMO/Dockerfile' ."
+                    }
+                    }
+                    stage("Push image DockerHub  ${job.key}") {
+                    container('docker') {
+                        sh "docker login -u hungnv31007 -p ${env.DOCKER_CI_PASSWORD} "
+                        sh "docker image tag demoapp:${version} hungnv31007/demoapp:${version}"
+                        sh "docker push hungnv31007/demoapp:${version}"
+                    }
+                    }
+                }
+            }
+        }
     }
-    
-  }
 }
