@@ -1,4 +1,5 @@
-    podYaml= """
+
+podYaml= """
 apiVersion: v1
 kind: Pod
 spec:
@@ -15,6 +16,7 @@ spec:
     hostPath:
       path: /var/run/docker.sock
 """
+version = '1.0.'+ env.BUILD_NUMBER
 
     pipeline {
         agent none
@@ -22,7 +24,8 @@ spec:
             stage('Create List of Stages to run in Parallel') {
                 steps {
                     script {
-                        def map = ["new" : "demoapp1"]
+                        def map = ["name" : "demoapp1",
+                                "name2" : "demoapp2"]
                         parallel map.collectEntries {
                             ["${it.key}" : generateStage(it)]
                         }
